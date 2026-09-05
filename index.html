@@ -1,0 +1,478 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Adventure</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #111;
+}
+
+#game {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: #5caf55;
+}
+
+/* WORLD */
+#world {
+    width: 2400px;
+    height: 1600px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background:
+        linear-gradient(90deg, transparent 48%, rgba(255,255,255,.08) 49%, rgba(255,255,255,.08) 51%, transparent 52%),
+        linear-gradient(0deg, transparent 48%, rgba(255,255,255,.08) 49%, rgba(255,255,255,.08) 51%, transparent 52%),
+        #5caf55;
+}
+
+/* PATHS */
+.path {
+    position: absolute;
+    background: #d7b978;
+    border: 3px solid #c5a45f;
+    border-radius: 30px;
+}
+
+#path1 {
+    width: 1500px;
+    height: 100px;
+    left: 300px;
+    top: 650px;
+}
+
+#path2 {
+    width: 100px;
+    height: 1000px;
+    left: 1000px;
+    top: 300px;
+}
+
+/* WATER */
+#water {
+    position: absolute;
+    width: 500px;
+    height: 300px;
+    left: 1500px;
+    top: 150px;
+    border-radius: 40px;
+    background: #45a9e8;
+    border: 8px solid #328dcc;
+}
+
+/* HOUSE */
+.house {
+    position: absolute;
+    width: 220px;
+    height: 170px;
+    background: #e8d5b5;
+    border: 6px solid #8c6239;
+    border-radius: 10px;
+}
+
+.house::before {
+    content: "";
+    position: absolute;
+    width: 230px;
+    height: 100px;
+    left: -11px;
+    top: -75px;
+    background: #a94442;
+    border: 6px solid #713332;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.door {
+    position: absolute;
+    width: 45px;
+    height: 75px;
+    bottom: 0;
+    left: 85px;
+    background: #70452b;
+    border-radius: 8px 8px 0 0;
+}
+
+/* PLAYER */
+#player {
+    position: absolute;
+    width: 55px;
+    height: 70px;
+    z-index: 20;
+}
+
+.player-body {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    left: 6px;
+    top: 27px;
+    border-radius: 12px;
+    background: #2478d0;
+    border: 4px solid white;
+}
+
+.player-head {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    left: 8px;
+    top: 0;
+    border-radius: 50%;
+    background: #f2c6a0;
+    border: 4px solid white;
+}
+
+/* NPC */
+#npc {
+    position: absolute;
+    width: 60px;
+    height: 75px;
+    z-index: 15;
+}
+
+.npc-body {
+    position: absolute;
+    width: 48px;
+    height: 45px;
+    left: 6px;
+    top: 30px;
+    background: #8e44ad;
+    border: 4px solid white;
+    border-radius: 12px;
+}
+
+.npc-head {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    left: 10px;
+    top: 0;
+    background: #f2c6a0;
+    border: 4px solid white;
+    border-radius: 50%;
+}
+
+/* QUEST MARK */
+#questMark {
+    position: absolute;
+    top: -45px;
+    left: 18px;
+    font-size: 35px;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-8px); }
+}
+
+/* TREES */
+.tree {
+    position: absolute;
+    width: 60px;
+    height: 90px;
+}
+
+.tree::before {
+    content: "🌳";
+    font-size: 65px;
+}
+
+/* HUD */
+#hud {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 100;
+    color: white;
+    background: rgba(0,0,0,.75);
+    padding: 15px 20px;
+    border-radius: 15px;
+    min-width: 180px;
+}
+
+#hud b {
+    color: #ffd43b;
+}
+
+/* QUEST BOX */
+#quest {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    width: 450px;
+    max-width: 90%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(0,0,0,.5);
+}
+
+#quest h1 {
+    margin-top: 0;
+}
+
+#answer {
+    width: 100%;
+    padding: 13px;
+    font-size: 18px;
+    margin: 15px 0;
+}
+
+button {
+    border: 0;
+    padding: 13px 25px;
+    border-radius: 10px;
+    background: #2478d0;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: .85;
+}
+
+#message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* CONTROLS */
+#controls {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    z-index: 100;
+    padding: 12px 18px;
+    border-radius: 12px;
+    color: white;
+    background: rgba(0,0,0,.7);
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div id="world">
+
+        <div id="water"></div>
+
+        <div id="path1" class="path"></div>
+        <div id="path2" class="path"></div>
+
+        <div class="house" style="left:350px; top:350px;">
+            <div class="door"></div>
+        </div>
+
+        <div class="house" style="left:1350px; top:850px;">
+            <div class="door"></div>
+        </div>
+
+        <div class="tree" style="left:150px;top:200px;"></div>
+        <div class="tree" style="left:450px;top:900px;"></div>
+        <div class="tree" style="left:800px;top:150px;"></div>
+        <div class="tree" style="left:1250px;top:250px;"></div>
+        <div class="tree" style="left:1800px;top:600px;"></div>
+        <div class="tree" style="left:2050px;top:1000px;"></div>
+        <div class="tree" style="left:600px;top:1250px;"></div>
+
+        <!-- NPC -->
+        <div id="npc" style="left:900px;top:600px;">
+            <div id="questMark">❗</div>
+            <div class="npc-head"></div>
+            <div class="npc-body"></div>
+        </div>
+
+        <!-- PLAYER -->
+        <div id="player">
+            <div class="player-head"></div>
+            <div class="player-body"></div>
+        </div>
+
+    </div>
+
+    <div id="hud">
+        ⭐ XP: <b id="xp">0</b><br>
+        🪙 Coins: <b id="coins">0</b><br>
+        📜 Quest: <b id="questStatus">Talk to the teacher</b>
+    </div>
+
+    <div id="controls">
+        🎮 WASD / Arrow Keys — Move<br>
+        💬 E — Talk to NPC
+    </div>
+
+    <div id="quest">
+        <h1>📜 Math Quest</h1>
+
+        <p>The teacher gives you a challenge!</p>
+
+        <h2>What is 3 × 4 + 2?</h2>
+
+        <input
+            id="answer"
+            type="number"
+            placeholder="Enter your answer"
+        >
+
+        <br>
+
+        <button onclick="checkAnswer()">Submit Answer</button>
+
+        <div id="message"></div>
+    </div>
+
+</div>
+
+<script>
+
+const player = document.getElementById("player");
+const world = document.getElementById("world");
+const npc = document.getElementById("npc");
+
+const quest = document.getElementById("quest");
+const answer = document.getElementById("answer");
+const message = document.getElementById("message");
+
+const xpDisplay = document.getElementById("xp");
+const coinsDisplay = document.getElementById("coins");
+const questStatus = document.getElementById("questStatus");
+
+let playerX = 500;
+let playerY = 500;
+
+let xp = 0;
+let coins = 0;
+
+const speed = 6;
+
+const keys = {};
+
+document.addEventListener("keydown", function(event) {
+
+    keys[event.key.toLowerCase()] = true;
+
+    if (event.key.toLowerCase() === "e") {
+        talkToNPC();
+    }
+
+    if (event.key === "Enter" && quest.style.display === "block") {
+        checkAnswer();
+    }
+});
+
+document.addEventListener("keyup", function(event) {
+    keys[event.key.toLowerCase()] = false;
+});
+
+function gameLoop() {
+
+    if (keys["w"] || keys["arrowup"]) {
+        playerY -= speed;
+    }
+
+    if (keys["s"] || keys["arrowdown"]) {
+        playerY += speed;
+    }
+
+    if (keys["a"] || keys["arrowleft"]) {
+        playerX -= speed;
+    }
+
+    if (keys["d"] || keys["arrowright"]) {
+        playerX += speed;
+    }
+
+    // Keep player inside world
+    playerX = Math.max(0, Math.min(2345, playerX));
+    playerY = Math.max(0, Math.min(1530, playerY));
+
+    player.style.left = playerX + "px";
+    player.style.top = playerY + "px";
+
+    // CAMERA
+    const cameraX = window.innerWidth / 2 - playerX - 27;
+    const cameraY = window.innerHeight / 2 - playerY - 35;
+
+    world.style.transform =
+        `translate(${cameraX}px, ${cameraY}px)`;
+
+    requestAnimationFrame(gameLoop);
+}
+
+function talkToNPC() {
+
+    const npcX = 900;
+    const npcY = 600;
+
+    const distance = Math.sqrt(
+        Math.pow(playerX - npcX, 2) +
+        Math.pow(playerY - npcY, 2)
+    );
+
+    if (distance < 120) {
+
+        quest.style.display = "block";
+
+        message.textContent = "";
+
+        answer.value = "";
+
+        answer.focus();
+    }
+}
+
+function checkAnswer() {
+
+    const userAnswer = Number(answer.value);
+
+    if (userAnswer === 14) {
+
+        xp += 10;
+        coins += 5;
+
+        xpDisplay.textContent = xp;
+        coinsDisplay.textContent = coins;
+
+        questStatus.textContent = "Quest completed!";
+
+        message.style.color = "green";
+        message.textContent =
+            "🎉 Correct! You earned +10 XP and +5 coins!";
+
+    } else {
+
+        message.style.color = "red";
+
+        message.textContent =
+            "❌ That's not correct. Try again!";
+    }
+}
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
+```
